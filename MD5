@@ -1,0 +1,12 @@
+745a57a158abadc628a8bf2bf6096e17 *DESCRIPTION
+c815f6e2e51ccf90b4c075509d87094f *NAMESPACE
+39900af0e6f9b4df71f7bb13cfeb1e1e *R/exif_read.R
+86db986109be35c28abb7bbef4aa2250 *R/globals.R
+41d61c4c42d134f6fa96fe1eea29e6fa *R/utils.R
+424e4f8c4b5f572b7fa3c0d5183635c1 *inst/exiftool/README
+d9d8c99fe716fac1d97983a6785c0d74 *inst/images/LaSals.jpg
+d2211f0c46332be6ceaf02e107b20c93 *inst/images/Lizard.jpg
+b60d7eb4b4f0b50cd9f1d8f3bfcd561a *man/configure_exiftoolr.Rd
+3168adb26f60fa1b5b40350ed5430917 *man/exif_call.Rd
+d974493d264dfbd1eff0ba0e4d66bdbb *man/exif_read.Rd
+8fd28f9413213b0cd7032fcfa5794d79 *man/install_exiftool.Rd
