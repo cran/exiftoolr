@@ -1,11 +1,10 @@
 Package: exiftoolr
 Type: Package
 Title: ExifTool Functionality from R
-Version: 0.1.0
-Date: 2018-08-02
+Version: 0.1.1
+Date: 2018-09-12
 Authors@R: c(person("Joshua", "O'Brien", role = c("aut", "cre"),
-                    email = "joshmobrien@gmail.com"),
-             person("Phil", "Harvey", role = "aut"))
+                    email = "joshmobrien@gmail.com"))
 Maintainer: Joshua O'Brien <joshmobrien@gmail.com>
 Description: Reads, writes, and edits EXIF and other file metadata
     using ExifTool <http://www.sno.phy.queensu.ca/~phil/exiftool/>,
@@ -27,8 +26,7 @@ Encoding: UTF-8
 Language: en-US
 RoxygenNote: 6.1.0
 NeedsCompilation: no
-Packaged: 2018-08-03 19:03:25 UTC; Josh
-Author: Joshua O'Brien [aut, cre],
-  Phil Harvey [aut]
+Packaged: 2018-09-12 14:39:09 UTC; Josh
+Author: Joshua O'Brien [aut, cre]
 Repository: CRAN
-Date/Publication: 2018-08-06 15:40:02 UTC
+Date/Publication: 2018-09-12 15:20:03 UTC

@@ -40,9 +40,9 @@
 ##'     Note that binary tags such as thumbnails are loaded as
 ##'     \href{https://en.wikipedia.org/wiki/Base64}{base64-encoded
 ##'     strings} that start with \code{"base64:"}. Although these are
-##'     truncated in printed versions of the returned
-##'     \code{data.frame}, they are left unaltered in the
-##'     \code{data.frame} itself.
+##'     truncated in the printed representation of the
+##'     \code{data.frame} returned by the function, they are left
+##'     unaltered in the \code{data.frame} itself.
 ##' @references \url{http://www.sno.phy.queensu.ca/~phil/exiftool/}
 ##' @importFrom jsonlite fromJSON
 ##' @export
@@ -135,8 +135,8 @@ exif_read <- function(path, tags = NULL,
 ##' @details For examples of the command-line calls to ExifTool (all
 ##'     of which can be reproduced by calls to \code{exif_call}), see
 ##'     \url{https://owl.phy.queensu.ca/~phil/exiftool/examples.html}.
-##' @return The exit code if \code{intern = FALSE}, or the standard
-##'     output as a character vector if \code{intern = TRUE}.
+##' @return The exit code (if \code{intern = FALSE}) or the standard
+##'     output as a character vector (if \code{intern = TRUE}).
 ##' @export
 ##'
 ##' @examples
