@@ -4,9 +4,8 @@
 ##' Reads EXIF and other metadata into a \code{data.frame} by calling
 ##' Phil Harvey's ExifTool command-line application.
 ##'
-##' From the
-##' \href{http://www.sno.phy.queensu.ca/~phil/exiftool/}{ExifTool
-##' website}: "ExifTool is a platform-independent Perl library plus a
+##' From the \href{https://exiftool.org}{ExifTool website}:
+##' "ExifTool is a platform-independent Perl library plus a
 ##' command-line application for reading, writing and editing meta
 ##' information in a wide variety of files. ExifTool supports many
 ##' different metadata formats including EXIF, GPS, IPTC, XMP, JFIF,
@@ -17,8 +16,7 @@
 ##' Panasonic/Leica, Pentax/Asahi, Phase One, Reconyx, Ricoh, Samsung,
 ##' Sanyo, Sigma/Foveon and Sony."
 ##'
-##' For more information, see the
-##' \href{http://www.sno.phy.queensu.ca/~phil/exiftool/}{ExifTool
+##' For more information, see the \href{https://exiftool.org}{ExifTool
 ##' website}.
 ##'
 ##' @param path A vector of filenames.
@@ -43,15 +41,15 @@
 ##'     truncated in the printed representation of the
 ##'     \code{data.frame} returned by the function, they are left
 ##'     unaltered in the \code{data.frame} itself.
-##' @references \url{http://www.sno.phy.queensu.ca/~phil/exiftool/}
+##' @references \url{https://exiftool.org}
 ##' @importFrom jsonlite fromJSON
 ##' @export
 ##'
 ##' @examples
 ##' \dontrun{
 ##' files <- dir(system.file(package = "exiftoolr", "images"),
-##'                   pattern = "*.jpg", full.names = TRUE)
-##' exifinfo <- exif_read(files)
+##'              pattern = "*.jpg", full.names = TRUE)
+##' exif_read(files)
 ##' exif_read(files, tags = c("filename", "imagesize"))
 ##' }
 exif_read <- function(path, tags = NULL,
@@ -59,7 +57,7 @@ exif_read <- function(path, tags = NULL,
                       args = NULL,
                       quiet = TRUE) {
     ## Ensure that exiftoolr is properly configured
-    if(!is_exiftoolr_configured()) {
+    if (!is_exiftoolr_configured()) {
         configure_exiftoolr(quiet = quiet)
         message("Using ExifTool version ", exif_version(), "\n")
     }
@@ -70,9 +68,9 @@ exif_read <- function(path, tags = NULL,
 
     ## check that all files exist (files that do not exist cause
     ## problems later, as do directories without recursive = TRUE)
-    if(recursive) {
+    if (recursive) {
         missing_dirs <- path[!dir.exists(path)]
-        if(length(missing_dirs)) {
+        if (length(missing_dirs)) {
             stop("Did you mean recursive = TRUE? ",
                  "The following directories are missing",
                  "(or are not directories): ",
@@ -80,18 +78,18 @@ exif_read <- function(path, tags = NULL,
         }
     } else {
         missing_files <- path[!file.exists(path) | dir.exists(path)]
-        if(length(missing_files)) {
+        if (length(missing_files)) {
             stop("Did you mean recursive = TRUE? ",
                  "The following files are missing (or are not files): ",
                  paste(missing_files, collapse = ", "))
         }
     }
 
-    if(recursive) {
+    if (recursive) {
         args <- c(args, "-r")
     }
 
-    if(!is.null(tags)) {
+    if (!is.null(tags)) {
         ## tags cannot have spaces...whitespace is stripped by ExifTool
         tags <- gsub("\\s", "", tags)
         args <- c(paste0("-", tags), args)
@@ -104,7 +102,7 @@ exif_read <- function(path, tags = NULL,
     ##   -b to ensure output is base64 encoded
     args <- unique(c("-n", "-j", "-q", "-b", args))
     ## an extra -q further silences warnings
-    if(quiet) {
+    if (quiet) {
         args <- c(args, "-q")
     }
 
@@ -134,7 +132,7 @@ exif_read <- function(path, tags = NULL,
 ##' @param ... Additional arguments to be passed to \code{system()}.
 ##' @details For examples of the command-line calls to ExifTool (all
 ##'     of which can be reproduced by calls to \code{exif_call}), see
-##'     \url{https://owl.phy.queensu.ca/~phil/exiftool/examples.html}.
+##'     \url{https://exiftool.org/examples.html}.
 ##' @return The exit code (if \code{intern = FALSE}) or the standard
 ##'     output as a character vector (if \code{intern = TRUE}).
 ##' @export
@@ -143,13 +141,14 @@ exif_read <- function(path, tags = NULL,
 ##' \dontrun{
 ##' ## Find local ExifTool version using exif_version() or exif_call()
 ##' exif_version()
-##' exif_call(args = "-ver", intern = TRUE, quiet = quiet)
+##' exif_call(args = "-ver", intern = TRUE)
 ##'
 ##' ## Make temporary copies of a couple jpeg files
-##' tmpdir <- file.path(tempdir(), "images")
-##' file.copy(dir(system.file(package = "exiftoolr", "images"),
-##'               full.names = TRUE), tmpdir, recursive = TRUE)
-##' files <- dir(tmpdir, full.names = TRUE)
+##' tmpdir <- tempdir()
+##' src_files <- dir(system.file(package = "exiftoolr", "images"),
+##'                  full.names = TRUE)
+##' files <- file.path(tmpdir, basename(src_files))
+##' file.copy(src_files, files)
 ##'
 ##' ## Both of the following extract the same tags:
 ##' exif_read(files, tags = c("filename", "imagesize"))
@@ -168,6 +167,7 @@ exif_read <- function(path, tags = NULL,
 ##' length(exif_read(file1))
 ##' exif_read(file1)
 ##'
+##' ## Clean up
 ##' unlink(files)
 ##' }
 exif_call <- function(args = NULL,
@@ -176,14 +176,14 @@ exif_call <- function(args = NULL,
                       quiet = FALSE,
                       ...) {
     ## Ensure that exiftoolr is properly configured
-    if(!is_exiftoolr_configured()) {
+    if (!is_exiftoolr_configured()) {
         configure_exiftoolr(quiet = quiet)
         message("Using ExifTool version ", exif_version(), "\n")
     }
 
     ## Exiftool command
     exiftoolpath <- get_exiftool_command()
-    if(is.null(exiftoolpath)) {
+    if (is.null(exiftoolpath)) {
         stop("ExifTool not properly installed or configured")
     }
 
