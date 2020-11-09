@@ -30,6 +30,17 @@
 ##' @param args Additional arguments.
 ##' @param quiet Use \code{FALSE} to display diagnostic
 ##'     information. Default value is \code{TRUE}
+##' @param pipeline One of \code{"json"} (the default) or
+##'     \code{"csv"}. Controls whether the exiftool executable, behind
+##'     the scenes, extracts metadata into a JSON data structure or a
+##'     tabular csv. The JSON pipeline works well in most cases, but
+##'     (as documented at
+##'     \url{https://exiftool.org/exiftool_pod.html}) does not
+##'     properly handle non-UTF-8 character sets. If the metadata
+##'     fields include characters that are not encoded using UTF-8 and
+##'     that need to be handled by setting the \code{"-charset"}
+##'     option, use the \code{"csv"} pipeline as demonstrated in the
+##'     second example below.
 ##' @return A data frame of class \code{"exiftoolr"} with one row per
 ##'     file processed. The first column, named \code{"SourceFile"}
 ##'     gives the name(s) of the processed files. Subsequent columns
@@ -43,19 +54,29 @@
 ##'     unaltered in the \code{data.frame} itself.
 ##' @references \url{https://exiftool.org}
 ##' @importFrom jsonlite fromJSON
+##' @importFrom data.table fread
 ##' @export
 ##'
 ##' @examples
 ##' \dontrun{
 ##' files <- dir(system.file(package = "exiftoolr", "images"),
-##'              pattern = "*.jpg", full.names = TRUE)
+##'              pattern = "LaSals|Lizard", full.names = TRUE)
 ##' exif_read(files)
 ##' exif_read(files, tags = c("filename", "imagesize"))
+##'
+##' ## Use pipeline="csv" for images needing explicit specification
+##' ## and proper handling of a non-default character sets
+##' img_file <- system.file(package = "exiftoolr", "images", "QS_Hongg.jpg")
+##' args <- c("-charset", "exiftool=cp1250")
+##' res <- exif_read(img_file, args = args, pipeline = "csv")
+##' res[["City"]]  ## "Zurich", with an umlaut over the "u"
 ##' }
 exif_read <- function(path, tags = NULL,
                       recursive = FALSE,
                       args = NULL,
-                      quiet = TRUE) {
+                      quiet = TRUE,
+                      pipeline = c("json", "csv")) {
+    pipeline <- match.arg(pipeline)
     ## Ensure that exiftoolr is properly configured
     if (!is_exiftoolr_configured()) {
         configure_exiftoolr(quiet = quiet)
@@ -89,31 +110,71 @@ exif_read <- function(path, tags = NULL,
         args <- c(args, "-r")
     }
 
+    ## an extra -q further silences warnings
+    if (quiet) {
+        args <- c(args, "-q")
+    }
+
     if (!is.null(tags)) {
         ## tags cannot have spaces...whitespace is stripped by ExifTool
         tags <- gsub("\\s", "", tags)
         args <- c(paste0("-", tags), args)
     }
 
+    ##-----------------------------------------##
+    ## Process using JSON intermediate output  ##
+    ##-----------------------------------------##
+
     ## required args:
     ##   -n for numeric output
     ##   -j for JSON output
     ##   -q for quiet
     ##   -b to ensure output is base64 encoded
-    args <- c("-n", "-j", "-q", "-b", args)
-    ## an extra -q further silences warnings
-    if (quiet) {
-        args <- c(args, "-q")
-    }
-
+    json_args <- c("-n", "-j", "-q", "-b", args)
     ## Construct and execute a call to Exiftool
     return_value <-
-        exif_call(args = args, path = path, intern = TRUE)
-
+        exif_call(args = json_args, path = path)
     ## Postprocess the results
     return_value <- fromJSON(paste0(return_value, collapse = ""))
-    class(return_value) <- c("exiftoolr", class(return_value))
 
+
+    if (pipeline == "csv") {
+        ## Get name and class of each column read in via JSON
+        json_names <- names(return_value)
+        json_classes <- unname(sapply(return_value, class))
+        ## required args:
+        ##   -n for numeric output
+        ##   -T for tabular output
+        ##   -csv for CSV output
+        ##   -api filter to properly handle tag values containing commas, double
+        ##        quotes, newline characters, or leading or trailing spaces.
+        ##   -q for quiet
+        ##   -b to ensure output is base64 encoded
+        filter <-
+          if (.Platform$OS.type == "windows") {
+             x <- '$_ = qq($_) if s/""/""""/g or /(^\\s+|\\s+$)/ or /[,\\n\\r]/'
+             shQuote(x)
+          } else {
+             x <- '$_ = qq{"$_"} if s/"/""/g or /(^\\s+|\\s+$)/ or /[,\\n\\r]/'
+             sQuote(x)
+          }
+        filter <- paste0("filter=", filter)
+        csv_args <- c("-n", "-T", "-csv", "-q", "-b", "-api", filter, args)
+        ## Call Exiftool, writing results to a temp file
+        res_file <- tempfile("exif_results")
+        on.exit(unlink(res_file))
+        exif_call(args = csv_args, path = path, stdout = res_file)
+        ## Prepare colClasses, accounting for possibility that the
+        ## "csv" pipeline produces more columns than the "json" one
+        csv_names <- names(fread(res_file, data.table = FALSE))
+        colClasses <- json_classes[match(csv_names, json_names)]
+        colClasses[is.na(colClasses)] <- "character"
+        ## Read in results using best available column class info
+        return_value <- fread(res_file, colClasses = colClasses,
+                              data.table = FALSE)
+    }
+
+    class(return_value) <- c("exiftoolr", class(return_value))
     return_value
 }
 
@@ -125,23 +186,25 @@ exif_read <- function(path, tags = NULL,
 ##'     form as you would if writing them on the command line
 ##'     (e.g. \code{"-n"} or \code{"-csv"})
 ##' @param path A character vector giving one or more file paths.
-##' @param intern \code{TRUE} if output should be returned as a
-##'     character vector. Default value is \code{FALSE}.
+##' @param stdout Where output to stdout should be sent. If
+##'     \code{TRUE} (the default), the output is captured in a
+##'     character vector. For other options, see the help file for
+##'     \code{\link[base]{system2}}, the function to which this
+##'     argument's value gets passed along.
 ##' @param quiet Use \code{FALSE} to display diagnostic
 ##'     information. Default value is \code{FALSE}.
-##' @param ... Additional arguments to be passed to \code{system()}.
+##' @param ... Additional arguments to be passed to \code{system2()}.
 ##' @details For examples of the command-line calls to ExifTool (all
 ##'     of which can be reproduced by calls to \code{exif_call}), see
 ##'     \url{https://exiftool.org/examples.html}.
-##' @return The exit code (if \code{intern = FALSE}) or the standard
-##'     output as a character vector (if \code{intern = TRUE}).
+##' @return The standard output as a character vector.
 ##' @export
 ##'
 ##' @examples
 ##' \dontrun{
 ##' ## Find local ExifTool version using exif_version() or exif_call()
 ##' exif_version()
-##' exif_call(args = "-ver", intern = TRUE)
+##' exif_call(args = "-ver")
 ##'
 ##' ## Make temporary copies of a couple jpeg files
 ##' tmpdir <- tempdir()
@@ -153,7 +216,7 @@ exif_read <- function(path, tags = NULL,
 ##' ## Both of the following extract the same tags:
 ##' exif_read(files, tags = c("filename", "imagesize"))
 ##' exif_call(args = c("-n", "-j", "-q", "-filename", "-imagesize"),
-##'           path = files, intern = TRUE)
+##'           path = files)
 ##'
 ##' ## Set value of a new "Artist" field in photo's metadata
 ##' file1 <- files[1]
@@ -172,7 +235,7 @@ exif_read <- function(path, tags = NULL,
 ##' }
 exif_call <- function(args = NULL,
                       path = NULL,
-                      intern = FALSE,
+                      stdout = TRUE,
                       quiet = FALSE,
                       ...) {
     ## Ensure that exiftoolr is properly configured
@@ -192,14 +255,14 @@ exif_call <- function(args = NULL,
     on.exit(unlink(argfile))
 
     ## Construct and then execute the command-line call
-    command <- paste(exiftoolpath, "-@", shQuote(argfile), collapse = " ")
-    system(command, intern = intern, ...)
+    args <- c("-@", shQuote(argfile))
+    system2(exiftoolpath, args = args, stdout = stdout)
 }
 
 ##' @rdname exif_call
 ##' @export
 exif_version <- function(quiet = TRUE) {
-    exif_call(args = "-ver", intern = TRUE, quiet = quiet)
+    exif_call(args = "-ver", quiet = quiet)
 }
 
 ## private helper command to generate call to exiftool
