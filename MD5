@@ -1,10 +1,10 @@
-ab0a96600a572fe0e7666294948276fb *DESCRIPTION
+b8fcbd8a26fa5bd701b8a591e3442192 *DESCRIPTION
 be703e1b54f26660e7c37912605e0e9a *NAMESPACE
-b0067ca9b920dbf829e885d97d2437a1 *NEWS.md
+ccfa65ca0b4e52d64ff5fddabb939146 *NEWS.md
 a513c16f4fca34a1d1e855470bf2c6de *R/exif_read.R
 86db986109be35c28abb7bbef4aa2250 *R/globals.R
 b668f3674207138f9db450b62d78c614 *R/install.R
-cb25696fe6b7277c6d7c331f15a4f3fb *R/utils.R
+4392a239b4f549148ebb68f5bbc51f91 *R/utils.R
 424e4f8c4b5f572b7fa3c0d5183635c1 *inst/exiftool/README
 d9d8c99fe716fac1d97983a6785c0d74 *inst/images/LaSals.jpg
 418d1e3eee54bde3deede7663257ac22 *inst/images/Lizard.jpg
