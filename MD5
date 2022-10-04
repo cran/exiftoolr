@@ -1,10 +1,11 @@
-b8fcbd8a26fa5bd701b8a591e3442192 *DESCRIPTION
+c9c543d3b55dd15b2d1fff27d4c61b9a *DESCRIPTION
 be703e1b54f26660e7c37912605e0e9a *NAMESPACE
-ccfa65ca0b4e52d64ff5fddabb939146 *NEWS.md
+a8fb579e66b6d7450057a8c4baa5bcc9 *NEWS.md
 a513c16f4fca34a1d1e855470bf2c6de *R/exif_read.R
 86db986109be35c28abb7bbef4aa2250 *R/globals.R
-b668f3674207138f9db450b62d78c614 *R/install.R
-4392a239b4f549148ebb68f5bbc51f91 *R/utils.R
+1c3744361614a817f1a9760e49dc7dfc *R/hooks.R
+858f13e253c78aff0d72a626d8d1c760 *R/install.R
+d793f168a107fd350d7c90f41dc8c83b *R/utils.R
 424e4f8c4b5f572b7fa3c0d5183635c1 *inst/exiftool/README
 d9d8c99fe716fac1d97983a6785c0d74 *inst/images/LaSals.jpg
 418d1e3eee54bde3deede7663257ac22 *inst/images/Lizard.jpg
@@ -12,4 +13,4 @@ d9d8c99fe716fac1d97983a6785c0d74 *inst/images/LaSals.jpg
 41a7d9bc408ef68bd154681ee3a6ef90 *man/configure_exiftoolr.Rd
 d3e427aa06d1fd5071cd74e1182849d1 *man/exif_call.Rd
 d770d470b3b98897d730704d3547490e *man/exif_read.Rd
-7b18074d11bdd9bb9d71036f8ea4b07c *man/install_exiftool.Rd
+7bf42dacfb51e79e6e70767cc475127f *man/install_exiftool.Rd

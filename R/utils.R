@@ -33,8 +33,8 @@ configure_exiftoolr <- function(command = NULL,
         ## executable
         if (allow_win_exe & is_windows()) {
             internal_win_exe <-
-                system.file("exiftool/win_exe/exiftool(-k).exe",
-                            package = "exiftoolr")
+                file.path(R_user_dir("exiftoolr", which = "data"),
+                          "win_exe", "exiftool(-k).exe")
             if (nchar(internal_win_exe))
                 command <- c(command, internal_win_exe)
         }
@@ -43,7 +43,8 @@ configure_exiftoolr <- function(command = NULL,
         ## (d) Check for locally installed ExifTool Perl scripts
         if (!is.null(perl_path)) {
             internal_exiftool <-
-                system.file("exiftool/exiftool", package = "exiftoolr")
+                file.path(R_user_dir("exiftoolr", which = "data"),
+                          "exiftool")
             if (nchar(internal_exiftool)) {
                 command <-
                     c(command,
@@ -161,7 +162,7 @@ test_exiftool <- function(command, quiet = TRUE) {
                                       silent = TRUE)))
     if (command_works) {
         ## check that version is a numeric value like 10.96
-        ver_string <- paste(system2(command, args = args, stderr = FALSE),
+        ver_string <- paste(system2(command, args = args, stdout = TRUE, stderr = FALSE),
                             collapse = "\n")
         ver_number <- suppressWarnings(as.numeric(ver_string))
         return(!is.na(ver_number))
