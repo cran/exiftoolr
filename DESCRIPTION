@@ -1,8 +1,8 @@
 Package: exiftoolr
 Type: Package
 Title: ExifTool Functionality from R
-Version: 0.2.0
-Date: 2022-10-03
+Version: 0.2.2
+Date: 2023-02-22
 Authors@R: c(person("Joshua", "O'Brien", role = c("aut", "cre"),
                     email = "joshmobrien@gmail.com"))
 Maintainer: Joshua O'Brien <joshmobrien@gmail.com>
@@ -24,9 +24,9 @@ Depends: R (>= 3.0.0)
 Imports: backports, curl, jsonlite, zip, data.table
 Encoding: UTF-8
 Language: en-US
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 NeedsCompilation: no
-Packaged: 2022-10-04 05:33:06 UTC; Josh
+Packaged: 2023-02-22 17:42:35 UTC; Josh
 Author: Joshua O'Brien [aut, cre]
 Repository: CRAN
-Date/Publication: 2022-10-04 05:50:02 UTC
+Date/Publication: 2023-02-22 18:00:03 UTC
