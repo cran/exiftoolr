@@ -133,7 +133,18 @@ exif_read <- function(path, tags = NULL,
     json_args <- c("-n", "-j", "-q", "-b", args)
     ## Construct and execute a call to Exiftool
     return_value <-
-        exif_call(args = json_args, path = path)
+        suppressWarnings(exif_call(args = json_args, path = path))
+
+    ## Handle rare case in which ExifTool finds no files to read
+    ## (e.g. https://github.com/JoshOBrien/exiftoolr/issues/20)
+    if (!length(return_value)) {
+        args <- setdiff(json_args, "-q")
+        return_value <-
+            suppressWarnings(exif_call(args = args, path = path))
+        warning(paste0(return_value, collapse = "\n"))
+        return(NULL)
+    }
+
     ## Postprocess the results
     return_value <- fromJSON(paste0(return_value, collapse = ""))
 
@@ -306,6 +317,27 @@ construct_argfile <- function(args, path) {
     }
     all_args <- c(args, path)
     tmpfile <- tempfile("args.cmd")
-    writeLines(all_args, tmpfile, sep="\n")
+    write_utf8(all_args, tmpfile)
     tmpfile
+}
+
+## Better than `base::writeLines()` when writing UTF-8 `args`
+## in a non-Unicode locale such as the "C" locale
+## `write_utf8()` from https://github.com/gaborcsardi/rencfaq
+## which is under CC0-1.0 Public Domain declaration
+## Note by default `exiftool` converts to UTF-8: https://exiftool.org/faq.html#Q10
+write_utf8 <- function(text, path) {
+    ## Step 1: Ensure our text is utf8 encoded
+    utf8 <- enc2utf8(text)
+    upath <- enc2utf8(path)
+
+    ## Step 2: Create a connection with 'native' encoding
+    ## this signals to R that translation before writing
+    ## to the connection should be skipped
+    con <- file(upath, open = "w+", encoding = "native.enc")
+    on.exit(close(con), add = TRUE)
+
+    ## Step 3: Write to the connection with 'useBytes = TRUE',
+    ## telling R to skip translation to the native encoding
+    writeLines(utf8, con = con, useBytes = TRUE)
 }
