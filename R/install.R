@@ -2,23 +2,20 @@
 ##' Install the current version of ExifTool
 ##'
 ##'
-##' @title Install ExifTool, downloading (by default) the current
-##'     version
-##' @param install_location Path to the directory into which ExifTool
-##'     should be installed. If \code{NULL} (the default),
-##'     installation will be into the directory returned by
-##'     \code{backports::R_user_dir("exiftoolr")}.
-##' @param win_exe Logical, only used on Windows machines. Should we
-##'     install the standalone ExifTool Windows executable or the
-##'     ExifTool Perl library?  (The latter relies, for its execution,
-##'     on an existing installation of Perl being present on the
-##'     user's machine.)  If set to \code{NULL} (the default), the
-##'     function installs the Windows executable on Windows machines
-##'     and the Perl library on other operating systems.
-##' @param local_exiftool If installing ExifTool from a local "*.zip"
-##'     or ".tar.gz", supply the path to that file as a character
-##'     string. With default value, `NULL`, the function downloads
-##'     ExifTool from \url{https://exiftool.org} and then installs it.
+##' @title Install ExifTool, downloading (by default) the current version
+##' @param install_location Path to the directory into which ExifTool should be
+##'     installed. If \code{NULL} (the default), installation will be into the
+##'     directory returned by \code{backports::R_user_dir("exiftoolr")}.
+##' @param win_exe Logical, only used on Windows machines. Should we install the
+##'     standalone ExifTool Windows executable or the ExifTool Perl library?
+##'     (The latter relies, for its execution, on an existing installation of
+##'     Perl being present on the user's machine.)  If set to \code{NULL} (the
+##'     default), the function installs the Windows executable on Windows
+##'     machines and the Perl library on other operating systems.
+##' @param local_exiftool If installing ExifTool from a local "*.zip" or
+##'     ".tar.gz", supply the path to that file as a character string. With
+##'     default value, `NULL`, the function downloads ExifTool from
+##'     \url{https://exiftool.org} and then installs it.
 ##' @param quiet Logical.  Should function should be chatty?
 ##' @return Called for its side effect
 ##' @export
@@ -75,7 +72,10 @@ install_exiftool <- function(install_location = NULL,
             dir.create(write_dir)
         }
         ## This calls zip::unzip, not utils::unzip
-        unzip(tmpfile, exdir = write_dir)
+        unzip(tmpfile, exdir = tmpdir)
+        exif_dir <- dir(tmpdir, pattern = "exiftool-")
+        file.copy(dir(exif_dir, full.names = TRUE), write_dir, recursive = TRUE)
+
     } else {
         ## Perl library
         untar(tmpfile, exdir = tmpdir)
@@ -115,7 +115,8 @@ download_exiftool <- function(win_exe = FALSE,
     ver <- current_exiftool_version()
     exiftool_url <-
         if(win_exe & is_windows()) {
-            file.path(base_url, paste0("exiftool-", ver, ".zip"))
+            platform <- ifelse(.Machine$sizeof.pointer == 8, "_64", "_32")
+            file.path(base_url, paste0("exiftool-", ver, platform, ".zip"))
         } else {
             file.path(base_url, paste0("Image-ExifTool-", ver, ".tar.gz"))
         }
@@ -129,6 +130,3 @@ download_exiftool <- function(win_exe = FALSE,
     curl_download(url = exiftool_url, destfile = download_path, quiet = quiet)
     return(download_path)
 }
-
-
-
