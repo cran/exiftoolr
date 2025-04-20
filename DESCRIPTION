@@ -1,8 +1,8 @@
 Package: exiftoolr
 Type: Package
 Title: ExifTool Functionality from R
-Version: 0.2.7
-Date: 2025-01-13
+Version: 0.2.8
+Date: 2025-04-19
 Authors@R: c(person("Joshua", "O'Brien", role = c("aut", "cre"),
                     email = "joshmobrien@gmail.com"))
 Maintainer: Joshua O'Brien <joshmobrien@gmail.com>
@@ -26,7 +26,7 @@ Encoding: UTF-8
 Language: en-US
 RoxygenNote: 7.3.2
 NeedsCompilation: no
-Packaged: 2025-01-14 06:05:40 UTC; Josh
+Packaged: 2025-04-19 17:59:06 UTC; Josh
 Author: Joshua O'Brien [aut, cre]
 Repository: CRAN
-Date/Publication: 2025-01-14 06:30:02 UTC
+Date/Publication: 2025-04-20 04:40:03 UTC
